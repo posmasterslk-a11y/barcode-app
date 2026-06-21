@@ -94,11 +94,11 @@
           <div class="row">
             <div class="form-group">
               <label>Exp Date</label>
-              <input type="text" v-model="labelData.expDate" class="form-input" placeholder="MM/YYYY" />
+              <input type="date" v-model="labelData.expDate" class="form-input" />
             </div>
             <div class="form-group">
               <label>Mfg Date</label>
-              <input type="text" v-model="labelData.mfgDate" class="form-input" placeholder="MM/YYYY" />
+              <input type="date" v-model="labelData.mfgDate" class="form-input" />
             </div>
           </div>
           <div class="form-group">
@@ -269,6 +269,13 @@ watch(labelData, (newVal) => {
 // PDF Export Logic
 const exportPDF = async () => {
   if (!paperRef.value) return;
+  
+  // Open the new tab immediately to bypass popup blockers
+  const newTab = window.open('', '_blank');
+  if (newTab) {
+    newTab.document.write('<div style="font-family: sans-serif; text-align: center; margin-top: 50px;"><h2>Generating your PDF...</h2><p>Please wait a moment.</p></div>');
+  }
+
   isExporting.value = true;
   
   try {
@@ -296,12 +303,20 @@ const exportPDF = async () => {
     
     pdf.addImage(imgData, 'PNG', 0, 0, pWidth, pHeight);
     
-    // Open PDF in a new tab instead of saving it directly
-    const pdfBlobUrl = pdf.output('bloburl');
-    window.open(pdfBlobUrl, '_blank');
+    // Pass the blob to the existing new tab
+    const pdfBlob = pdf.output('blob');
+    const pdfBlobUrl = URL.createObjectURL(pdfBlob);
+    
+    if (newTab) {
+      newTab.location.href = pdfBlobUrl;
+    } else {
+      // Fallback if popup blocker caught the synchronous open (rare)
+      window.open(pdfBlobUrl, '_blank');
+    }
     
   } catch (err) {
     console.error('Error generating PDF:', err);
+    if (newTab) newTab.close();
     alert('Failed to generate PDF. Check console for details.');
   } finally {
     isExporting.value = false;
