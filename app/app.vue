@@ -104,7 +104,7 @@
               <input type="date" v-model="labelData.expDate" class="form-input" />
             </div>
             <div class="form-group">
-              <label>Mfg Date</label>
+              <label>MFD Date</label>
               <input type="date" v-model="labelData.mfgDate" class="form-input" />
             </div>
           </div>
@@ -142,7 +142,7 @@
             <div class="label-footer" :style="{ fontSize: settings.fontSizeFooter + 'px' }">
               <span class="label-footer-item">Exp: {{ labelData.expDate || 'N/A' }}</span>
               <span class="label-footer-item">Lot: {{ labelData.lotNumber || 'N/A' }}</span>
-              <span class="label-footer-item">Mfg: {{ labelData.mfgDate || 'N/A' }}</span>
+              <span class="label-footer-item">MFD: {{ labelData.mfgDate || 'N/A' }}</span>
             </div>
           </div>
         </div>
@@ -173,7 +173,7 @@ const settings = reactive({
   fontSizeShop: 11,
   fontSizeItem: 14,
   fontSizeBarcode: 12,
-  fontSizeFooter: 10
+  fontSizeFooter: 12
 })
 
 const labelData = reactive({
