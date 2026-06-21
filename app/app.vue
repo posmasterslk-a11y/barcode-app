@@ -1,5 +1,12 @@
 <template>
-  <div class="layout-container">
+  <div class="app-wrapper">
+    <header class="topbar">
+      <div class="topbar-brand">
+        <img src="/logo.png" alt="POS Masters Logo" class="brand-logo" @error="(e) => e.target.style.display='none'" />
+        <h1>POS Masters Barcode Studio</h1>
+      </div>
+    </header>
+    <div class="layout-container">
     <aside class="sidebar">
       <div class="glass-panel">
         <div class="panel-header">
@@ -21,22 +28,22 @@
           </div>
           <div class="row">
             <div class="form-group">
-              <label>Paper Width</label>
-              <input type="number" v-model.number="settings.paperWidth" class="form-input" />
-            </div>
-            <div class="form-group">
-              <label>Paper Height (Optional)</label>
-              <input type="number" v-model.number="settings.paperHeight" class="form-input" placeholder="Auto" />
-            </div>
-          </div>
-          <div class="row">
-            <div class="form-group">
               <label>Label Width (Optional)</label>
               <input type="number" v-model.number="settings.labelWidth" class="form-input" placeholder="Auto" />
             </div>
             <div class="form-group">
               <label>Label Height</label>
               <input type="number" v-model.number="settings.labelHeight" class="form-input" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label>Paper Width</label>
+              <input type="number" v-model.number="settings.paperWidth" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>Paper Height (Optional)</label>
+              <input type="number" v-model.number="settings.paperHeight" class="form-input" placeholder="Auto" />
             </div>
           </div>
           <div class="form-group">
@@ -144,6 +151,7 @@
         Powered By POS Masters : 070 296 7270
       </footer>
     </main>
+  </div>
   </div>
 </template>
 
