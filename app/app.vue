@@ -48,9 +48,41 @@
 
       <div class="glass-panel">
         <div class="panel-header">
+          <h3>Typography (Font Sizes)</h3>
+        </div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="form-group">
+              <label>Shop Name</label>
+              <input type="number" v-model.number="settings.fontSizeShop" class="form-input" min="5" max="50" />
+            </div>
+            <div class="form-group">
+              <label>Item Name</label>
+              <input type="number" v-model.number="settings.fontSizeItem" class="form-input" min="5" max="50" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label>Barcode Text</label>
+              <input type="number" v-model.number="settings.fontSizeBarcode" class="form-input" min="5" max="50" />
+            </div>
+            <div class="form-group">
+              <label>Footer</label>
+              <input type="number" v-model.number="settings.fontSizeFooter" class="form-input" min="5" max="50" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-panel">
+        <div class="panel-header">
           <h3>Label Data</h3>
         </div>
         <div class="panel-body">
+          <div class="form-group">
+            <label>Shop Name</label>
+            <input type="text" v-model="labelData.shopName" class="form-input" placeholder="e.g. My Super Shop" />
+          </div>
           <div class="form-group">
             <label>Item Name</label>
             <input type="text" v-model="labelData.itemName" class="form-input" placeholder="e.g. Premium Widget" />
@@ -97,9 +129,10 @@
             class="label-item"
             :style="labelStyle"
           >
-            <div class="label-header">{{ labelData.itemName || 'Item Name' }}</div>
-            <svg :ref="el => { if(el) barcodeRefs[i-1] = el }"></svg>
-            <div class="label-footer">
+            <div class="label-shop-name" :style="{ fontSize: settings.fontSizeShop + 'px', fontWeight: 'bold', marginBottom: '2px' }">{{ labelData.shopName || 'Shop Name' }}</div>
+            <div class="label-header" :style="{ fontSize: settings.fontSizeItem + 'px' }">{{ labelData.itemName || 'Item Name' }}</div>
+            <img :ref="el => { if(el) barcodeRefs[i-1] = el }" class="label-barcode-img" />
+            <div class="label-footer" :style="{ fontSize: settings.fontSizeFooter + 'px' }">
               <span class="label-footer-item">Exp: {{ labelData.expDate || 'N/A' }}</span>
               <span class="label-footer-item">Lot: {{ labelData.lotNumber || 'N/A' }}</span>
               <span class="label-footer-item">Mfg: {{ labelData.mfgDate || 'N/A' }}</span>
@@ -107,6 +140,9 @@
           </div>
         </div>
       </div>
+      <footer style="text-align: center; margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+        Powered By POS Masters : 070 296 7270
+      </footer>
     </main>
   </div>
 </template>
@@ -125,10 +161,15 @@ const settings = reactive({
   paperHeight: null, // Total paper height (auto if null)
   labelWidth: null, // Optional explicit label width
   labelHeight: 25, // Height of a single label
-  totalLabels: 10
+  totalLabels: 10,
+  fontSizeShop: 11,
+  fontSizeItem: 14,
+  fontSizeBarcode: 12,
+  fontSizeFooter: 10
 })
 
 const labelData = reactive({
+  shopName: 'My Super Shop',
   itemName: 'Super Widget',
   barcode: '123456789012',
   expDate: '12/2026',
@@ -180,7 +221,7 @@ const renderBarcodes = () => {
           JsBarcode(svgEl, labelData.barcode, {
             format: "CODE128",
             displayValue: true,
-            fontSize: 12,
+            fontSize: settings.fontSizeBarcode,
             margin: 2,
             height: 30,
             width: 1.2
@@ -195,7 +236,7 @@ const renderBarcodes = () => {
 
 // Watchers
 watch(
-  () => [labelData.barcode, settings.totalLabels],
+  () => [labelData.barcode, settings.totalLabels, settings.fontSizeBarcode],
   () => {
     // Reset refs array length
     barcodeRefs.value = new Array(settings.totalLabels).fill(null)
@@ -241,26 +282,23 @@ const exportPDF = async () => {
     const imgData = canvas.toDataURL('image/png');
     
     // 2. Calculate PDF dimensions
-    // jsPDF uses pt by default, but we can configure it to use our unit (mm or in)
     const pdfUnit = settings.unit === 'in' ? 'in' : 'mm';
-    
-    // Need to calculate physical size for PDF
-    // We assume the paperWidth input corresponds to physical paper size
-    const pdfWidth = settings.paperWidth;
-    
-    // Calculate aspect ratio to determine height if not set
+    const pWidth = parseFloat(settings.paperWidth) || 100;
     const imgRatio = canvas.width / canvas.height;
-    const pdfHeight = settings.paperHeight || (pdfWidth / imgRatio);
+    const pHeight = settings.paperHeight ? parseFloat(settings.paperHeight) : (pWidth / imgRatio);
     
     // 3. Create PDF and add image
     const pdf = new jsPDF({
-      orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+      orientation: pWidth > pHeight ? 'landscape' : 'portrait',
       unit: pdfUnit,
-      format: [pdfWidth, pdfHeight]
+      format: [pWidth, pHeight]
     });
     
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save('barcode-labels.pdf');
+    pdf.addImage(imgData, 'PNG', 0, 0, pWidth, pHeight);
+    
+    // Open PDF in a new tab instead of saving it directly
+    const pdfBlobUrl = pdf.output('bloburl');
+    window.open(pdfBlobUrl, '_blank');
     
   } catch (err) {
     console.error('Error generating PDF:', err);
