@@ -242,13 +242,13 @@ body {
 
 .label-footer {
   display: flex;
-  justify-content: space-between;
-  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px 8px;
   width: 100%;
   margin-top: 2px;
   color: #333;
   overflow: hidden;
-  white-space: nowrap;
 }
 
 .label-footer-item {
